@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFrameworks>net9.0;net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);CS0436</NoWarn>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<EnableAOTAnalyzer>true</EnableAOTAnalyzer>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Include="../Common/**/*.cs" LinkBase="Common" />

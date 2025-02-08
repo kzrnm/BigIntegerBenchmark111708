@@ -3,15 +3,26 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+		<PlatformTarget>x64</PlatformTarget>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<EnableAOTAnalyzer>true</EnableAOTAnalyzer>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<NoWarn>CS3021;CS0436;CS8604</NoWarn>
+		<IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+		<TrimMode>link</TrimMode>
+		<TrimmerDefaultAction>link</TrimmerDefaultAction>
+		<IlcGenerateCompleteTypeMetadata>True</IlcGenerateCompleteTypeMetadata>
+		<IlcGenerateStackTraceData>True</IlcGenerateStackTraceData>
+		<EnsureNETCoreAppRuntime>false</EnsureNETCoreAppRuntime>
+		<StackTraceSupport>True</StackTraceSupport>
+		<ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+		<RestoreAdditionalProjectSources>https://www.myget.org/F/benchmarkdotnet/api/v3/index.json;$(RestoreAdditionalProjectSources)</RestoreAdditionalProjectSources>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.14.1-nightly.20240828.182" />
 	</ItemGroup>
 
 	<ItemGroup>

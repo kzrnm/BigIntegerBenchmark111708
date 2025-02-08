@@ -8,6 +8,8 @@ using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Toolchains.CsProj;
 using System.Numerics;
+using BigInteger8 = Net8::System.Numerics.BigInteger;
+using BigInteger9 = Net9::System.Numerics.BigInteger;
 
 public class BenchmarkConfig : ManualConfig
 {
@@ -25,6 +27,7 @@ public class BenchmarkConfig : ManualConfig
         AddExporter(BenchmarkDotNet.Exporters.MarkdownExporter.GitHub);
         AddJob(Job.ShortRun.WithToolchain(CsProjCoreToolchain.NetCoreApp80));
         AddJob(Job.ShortRun.WithToolchain(CsProjCoreToolchain.NetCoreApp90));
+        //AddJob(Job.ShortRun.WithToolchain(BenchmarkDotNet.Toolchains.NativeAot.NativeAotToolchain.Net90));
         SummaryStyle = SummaryStyle.Default
         .WithRatioStyle(BenchmarkDotNet.Columns.RatioStyle.Value)
         ;
@@ -42,11 +45,11 @@ public class Benchmark
     [Benchmark(Baseline = true)]
     public void SystemRuntimeNumerics() => bigInteger.TryFormat(_dest, out _);
 
-    Net8::System.Numerics.BigInteger net8BigInteger = Net8::System.Numerics.BigInteger.One << (1 << 20);
+    BigInteger8 net8BigInteger = BigInteger8.One << (1 << 20);
     [Benchmark]
     public void Net8Clone() => net8BigInteger.TryFormat(_dest, out _);
 
-    Net9::System.Numerics.BigInteger net9BigInteger = Net9::System.Numerics.BigInteger.One << (1 << 20);
+    BigInteger9 net9BigInteger = BigInteger9.One << (1 << 20);
     [Benchmark]
     public void Net9Clone() => net9BigInteger.TryFormat(_dest, out _);
 }
