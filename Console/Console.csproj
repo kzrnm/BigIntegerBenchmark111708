@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PublishAot>true</PublishAot>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<IlcInstructionSet>native</IlcInstructionSet>
+		<IlcMaxVectorTBitWidth>512</IlcMaxVectorTBitWidth>
+		<IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Net8Clone\Net8Clone.csproj" Aliases="Net8" />
+		<ProjectReference Include="..\Net9Clone\Net9Clone.csproj" Aliases="Net9" />
+	</ItemGroup>
+</Project>
