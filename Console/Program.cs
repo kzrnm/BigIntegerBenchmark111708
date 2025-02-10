@@ -1,5 +1,6 @@
 ﻿extern alias Net8;
 extern alias Net9;
+extern alias Net9NoOpt;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -8,6 +9,7 @@ Console.WriteLine(typeof(BigInteger).Assembly);
 Run<BigInteger>();
 Run<Net8::System.Numerics.BigInteger>();
 Run<Net9::System.Numerics.BigInteger>();
+Run<Net9NoOpt::System.Numerics.BigInteger>();
 
 static void Run<T>() where T : IBinaryInteger<T>
 {

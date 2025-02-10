@@ -740,6 +740,9 @@ namespace System
             return spanSuccess;
         }
 
+#if NoOptimization
+        [MethodImpl(MethodImplOptions.NoOptimization)]
+#endif
         private static unsafe string? FormatBigInteger(
             bool targetSpan, BigInteger value,
             string? formatString, ReadOnlySpan<char> formatSpan,

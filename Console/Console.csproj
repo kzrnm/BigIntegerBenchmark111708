@@ -17,5 +17,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Net8Clone\Net8Clone.csproj" Aliases="Net8" />
 		<ProjectReference Include="..\Net9Clone\Net9Clone.csproj" Aliases="Net9" />
+		<ProjectReference Include="..\Net9CloneNoOptimization\Net9CloneNoOptimization.csproj" Aliases="Net9NoOpt" />
 	</ItemGroup>
 </Project>

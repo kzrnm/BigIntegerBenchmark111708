@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<NoWarn>$(NoWarn);CS0436</NoWarn>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<EnableAOTAnalyzer>true</EnableAOTAnalyzer>
+		<DefineConstants>$(DefineConstants);NoOptimization</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="../Common/**/*.cs" LinkBase="Common" />
+		<Compile Include="../Net9Clone/**/*.cs" Exclude="**/obj/**" />
+	</ItemGroup>
+</Project>
