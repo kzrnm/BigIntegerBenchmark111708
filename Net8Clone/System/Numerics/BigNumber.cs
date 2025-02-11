@@ -302,8 +302,8 @@ namespace System.Numerics
         private static Exception GetException(ParsingStatus status)
         {
             return status == ParsingStatus.Failed
-                ? new FormatException("Overflow_ParseBigInteger")
-                : new OverflowException("Overflow_ParseBigInteger");
+                ? new FormatException(SR.Overflow_ParseBigInteger)
+                : new OverflowException(SR.Overflow_ParseBigInteger);
         }
 
         private struct BigNumberBuffer
@@ -327,14 +327,14 @@ namespace System.Numerics
             // Check for undefined flags
             if ((style & InvalidNumberStyles) != 0)
             {
-                e = new ArgumentException("Argument_InvalidNumberStyles", nameof(style));
+                e = new ArgumentException(SR.Argument_InvalidNumberStyles, nameof(style));
                 return false;
             }
             if ((style & NumberStyles.AllowHexSpecifier) != 0)
             { // Check for hex number
                 if ((style & ~NumberStyles.HexNumber) != 0)
                 {
-                    e = new ArgumentException("Argument_InvalidHexStyle", nameof(style));
+                    e = new ArgumentException(SR.Argument_InvalidHexStyle, nameof(style));
                     return false;
                 }
             }
@@ -897,7 +897,7 @@ namespace System.Numerics
                     // Check if we are about to overflow past our limit of 9 digits
                     if (n >= 100_000_000)
                     {
-                        throw new FormatException("Argument_BadFormatSpecifier");
+                        throw new FormatException(SR.Argument_BadFormatSpecifier);
                     }
                     n = ((n * 10) + format[i++] - '0');
                 }
@@ -1052,7 +1052,7 @@ namespace System.Numerics
             {
                 cuMax = checked(cuSrc * 10 / 9 + 2);
             }
-            catch (OverflowException e) { throw new FormatException("Format_TooLarge", e); }
+            catch (OverflowException e) { throw new FormatException(SR.Format_TooLarge, e); }
             uint[] rguDst = new uint[cuMax];
             int cuDst = 0;
 
@@ -1081,7 +1081,7 @@ namespace System.Numerics
                 // Each uint contributes at most 9 digits to the decimal representation.
                 cchMax = checked(cuDst * kcchBase);
             }
-            catch (OverflowException e) { throw new FormatException("Format_TooLarge", e); }
+            catch (OverflowException e) { throw new FormatException(SR.Format_TooLarge, e); }
 
             bool decimalFmt = (fmt == 'g' || fmt == 'G' || fmt == 'd' || fmt == 'D' || fmt == 'r' || fmt == 'R');
             if (decimalFmt)
@@ -1095,7 +1095,7 @@ namespace System.Numerics
                         // Leave an extra slot for a minus sign.
                         cchMax = checked(cchMax + info.NegativeSign.Length);
                     }
-                    catch (OverflowException e) { throw new FormatException("Format_TooLarge", e); }
+                    catch (OverflowException e) { throw new FormatException(SR.Format_TooLarge, e); }
                 }
             }
 
@@ -1107,7 +1107,7 @@ namespace System.Numerics
                 // to be null terminated.  Let's ensure that we can allocate a buffer of that size.
                 rgchBufSize = checked(cchMax + 1);
             }
-            catch (OverflowException e) { throw new FormatException("Format_TooLarge", e); }
+            catch (OverflowException e) { throw new FormatException(SR.Format_TooLarge, e); }
 
             char[] rgch = new char[rgchBufSize];
 

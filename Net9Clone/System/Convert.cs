@@ -1,16 +1,10 @@
-﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Buffers;
 
+#if !NET9_0_OR_GREATER
 namespace System
 {
-    public class Convert
+    internal static class Convert
     {
-        [MethodImpl(256)]
         public static OperationStatus FromHexString(ReadOnlySpan<char> source, Span<byte> destination, out int charsConsumed, out int bytesWritten)
         {
             (int quotient, int remainder) = Math.DivRem(source.Length, 2);
@@ -58,3 +52,4 @@ namespace System
         }
     }
 }
+#endif

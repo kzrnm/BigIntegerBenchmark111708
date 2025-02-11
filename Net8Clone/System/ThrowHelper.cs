@@ -24,7 +24,7 @@ namespace System
         [DoesNotReturn]
         internal static void ThrowValueArgumentOutOfRange_NeedNonNegNumException()
         {
-            throw new ArgumentOutOfRangeException("value", "ArgumentOutOfRange_NeedNonNegNum");
+            throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
         }
     }
 }

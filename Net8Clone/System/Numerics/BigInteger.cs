@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Numerics;
 
 namespace System.Numerics
 {
@@ -20,8 +19,8 @@ namespace System.Numerics
           IComparable,
           IComparable<BigInteger>,
           IEquatable<BigInteger>,
-         System.Numerics.IBinaryInteger<BigInteger>,
-           System.Numerics.ISignedNumber<BigInteger>
+          IBinaryInteger<BigInteger>,
+          ISignedNumber<BigInteger>
     {
         private const uint kuMaskHighBit = unchecked((uint)int.MinValue);
         private const int kcbitUint = 32;
@@ -146,11 +145,11 @@ namespace System.Numerics
             {
                 if (double.IsInfinity(value))
                 {
-                    throw new OverflowException("Overflow_BigIntInfinity");
+                    throw new OverflowException(SR.Overflow_BigIntInfinity);
                 }
                 else // NaN
                 {
-                    throw new OverflowException("Overflow_NotANumber");
+                    throw new OverflowException(SR.Overflow_NotANumber);
                 }
             }
 
@@ -632,12 +631,12 @@ namespace System.Numerics
                 AssertValid();
 
                 if (_bits == null)
-                    return System.Numerics.BitOperations.IsPow2(_sign);
+                    return BitOperations.IsPow2(_sign);
 
                 if (_sign != 1)
                     return false;
                 int iu = _bits.Length - 1;
-                if (!System.Numerics.BitOperations.IsPow2(_bits[iu]))
+                if (!BitOperations.IsPow2(_bits[iu]))
                     return false;
                 while (--iu >= 0)
                 {
@@ -851,7 +850,7 @@ namespace System.Numerics
             ulong l = value._bits.Length > 2 ? value._bits[value._bits.Length - 3] : 0;
 
             // Measure the exact bit count
-            int c = System.Numerics.BitOperations.LeadingZeroCount((uint)h);
+            int c = BitOperations.LeadingZeroCount((uint)h);
             long b = (long)value._bits.Length * 32 - c;
 
             // Extract most significant bits
@@ -1218,7 +1217,7 @@ namespace System.Numerics
             if (obj == null)
                 return 1;
             if (obj is not BigInteger bigInt)
-                throw new ArgumentException("Argument_MustBeBigInt", nameof(obj));
+                throw new ArgumentException(SR.Argument_MustBeBigInt, nameof(obj));
             return CompareTo(bigInt);
         }
 
@@ -1358,7 +1357,7 @@ namespace System.Numerics
 
             if (isUnsigned && sign < 0)
             {
-                throw new OverflowException("Overflow_Negative_Unsigned");
+                throw new OverflowException(SR.Overflow_Negative_Unsigned);
             }
 
             byte highByte;
@@ -1813,7 +1812,7 @@ namespace System.Numerics
                 return value._sign;
 
             int length = value._bits.Length;
-            if (length > 3) throw new OverflowException("Overflow_Decimal");
+            if (length > 3) throw new OverflowException(SR.Overflow_Decimal);
 
             int lo = 0, mi = 0, hi = 0;
 
@@ -1825,6 +1824,43 @@ namespace System.Numerics
             }
 
             return new decimal(lo, mi, hi, value._sign < 0, 0);
+        }
+
+        public static explicit operator double(BigInteger value)
+        {
+            value.AssertValid();
+
+            int sign = value._sign;
+            uint[]? bits = value._bits;
+
+            if (bits == null)
+                return sign;
+
+            int length = bits.Length;
+
+            // The maximum exponent for doubles is 1023, which corresponds to a uint bit length of 32.
+            // All BigIntegers with bits[] longer than 32 evaluate to Double.Infinity (or NegativeInfinity).
+            // Cases where the exponent is between 1024 and 1035 are handled in NumericsHelpers.GetDoubleFromParts.
+            const int InfinityLength = 1024 / kcbitUint;
+
+            if (length > InfinityLength)
+            {
+                if (sign == 1)
+                    return double.PositiveInfinity;
+                else
+                    return double.NegativeInfinity;
+            }
+
+            ulong h = bits[length - 1];
+            ulong m = length > 1 ? bits[length - 2] : 0;
+            ulong l = length > 2 ? bits[length - 3] : 0;
+
+            int z = BitOperations.LeadingZeroCount((uint)h);
+
+            int exp = (length - 2) * 32 - z;
+            ulong man = (h << 32 + z) | (m << z) | (l >> 32 - z);
+
+            return NumericsHelpers.GetDoubleFromParts(sign, exp, man);
         }
 
         /// <summary>Explicitly converts a big integer to a <see cref="Half" /> value.</summary>
@@ -1850,7 +1886,7 @@ namespace System.Numerics
             if (value._bits.Length > 1)
             {
                 // More than 32 bits
-                throw new OverflowException("Overflow_Int32");
+                throw new OverflowException(SR.Overflow_Int32);
             }
             if (value._sign > 0)
             {
@@ -1859,7 +1895,7 @@ namespace System.Numerics
             if (value._bits[0] > kuMaskHighBit)
             {
                 // Value > Int32.MinValue
-                throw new OverflowException("Overflow_Int32");
+                throw new OverflowException(SR.Overflow_Int32);
             }
             return unchecked(-(int)value._bits[0]);
         }
@@ -1875,7 +1911,7 @@ namespace System.Numerics
             int len = value._bits.Length;
             if (len > 2)
             {
-                throw new OverflowException("Overflow_Int64");
+                throw new OverflowException(SR.Overflow_Int64);
             }
 
             ulong uu;
@@ -1894,7 +1930,7 @@ namespace System.Numerics
                 // Signs match, no overflow
                 return ll;
             }
-            throw new OverflowException("Overflow_Int64");
+            throw new OverflowException(SR.Overflow_Int64);
         }
 
         /// <summary>Explicitly converts a big integer to a <see cref="Int128" /> value.</summary>
@@ -1913,7 +1949,7 @@ namespace System.Numerics
 
             if (len > 4)
             {
-                throw new OverflowException("Overflow_Int128");
+                throw new OverflowException(SR.Overflow_Int128);
             }
 
             UInt128 uu;
@@ -1941,7 +1977,7 @@ namespace System.Numerics
                 // Signs match, no overflow
                 return ll;
             }
-            throw new OverflowException("Overflow_Int128");
+            throw new OverflowException(SR.Overflow_Int128);
         }
 
         /// <summary>Explicitly converts a big integer to a <see cref="IntPtr" /> value.</summary>
@@ -1986,7 +2022,7 @@ namespace System.Numerics
             }
             else if (value._bits.Length > 1 || value._sign < 0)
             {
-                throw new OverflowException("Overflow_UInt32");
+                throw new OverflowException(SR.Overflow_UInt32);
             }
             else
             {
@@ -2006,7 +2042,7 @@ namespace System.Numerics
             int len = value._bits.Length;
             if (len > 2 || value._sign < 0)
             {
-                throw new OverflowException("Overflow_UInt64");
+                throw new OverflowException(SR.Overflow_UInt64);
             }
 
             if (len > 1)
@@ -2033,7 +2069,7 @@ namespace System.Numerics
 
             if ((len > 4) || (value._sign < 0))
             {
-                throw new OverflowException("Overflow_UInt128");
+                throw new OverflowException(SR.Overflow_UInt128);
             }
 
             if (len > 2)
@@ -2086,6 +2122,18 @@ namespace System.Numerics
         public static explicit operator BigInteger(Half value)
         {
             return new BigInteger((float)value);
+        }
+
+        /// <summary>Explicitly converts a <see cref="Complex" /> value to a big integer.</summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns><paramref name="value" /> converted to a big integer.</returns>
+        public static explicit operator BigInteger(Complex value)
+        {
+            if (value.Imaginary != 0)
+            {
+                ThrowHelper.ThrowOverflowException();
+            }
+            return (BigInteger)value.Real;
         }
 
         public static explicit operator BigInteger(float value)
@@ -3031,7 +3079,7 @@ namespace System.Numerics
                 highValue = bits[bitsArrayLength - 1];
             }
 
-            long bitLength = bitsArrayLength * 32L - System.Numerics.BitOperations.LeadingZeroCount(highValue);
+            long bitLength = bitsArrayLength * 32L - BitOperations.LeadingZeroCount(highValue);
 
             if (sign >= 0)
                 return bitLength;
@@ -3115,14 +3163,14 @@ namespace System.Numerics
         }
 
         //
-        //  System.Numerics.IAdditiveIdentity
+        // IAdditiveIdentity
         //
 
-        /// <inheritdoc cref=" System.Numerics.IAdditiveIdentity{TSelf, TResult}.AdditiveIdentity" />
-        static BigInteger  System.Numerics.IAdditiveIdentity<BigInteger, BigInteger>.AdditiveIdentity => Zero;
+        /// <inheritdoc cref="IAdditiveIdentity{TSelf, TResult}.AdditiveIdentity" />
+        static BigInteger IAdditiveIdentity<BigInteger, BigInteger>.AdditiveIdentity => Zero;
 
         //
-        //System.Numerics.IBinaryInteger
+        // IBinaryInteger
         //
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.DivRem(TSelf, TSelf)" />
@@ -3501,21 +3549,21 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.TryReadBigEndian(ReadOnlySpan{byte}, bool, out TSelf)" />
-        static bool System.Numerics.IBinaryInteger<BigInteger>.TryReadBigEndian(ReadOnlySpan<byte> source, bool isUnsigned, out BigInteger value)
+        static bool IBinaryInteger<BigInteger>.TryReadBigEndian(ReadOnlySpan<byte> source, bool isUnsigned, out BigInteger value)
         {
             value = new BigInteger(source, isUnsigned, isBigEndian: true);
             return true;
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.TryReadLittleEndian(ReadOnlySpan{byte}, bool, out TSelf)" />
-        static bool System.Numerics.IBinaryInteger<BigInteger>.TryReadLittleEndian(ReadOnlySpan<byte> source, bool isUnsigned, out BigInteger value)
+        static bool IBinaryInteger<BigInteger>.TryReadLittleEndian(ReadOnlySpan<byte> source, bool isUnsigned, out BigInteger value)
         {
             value = new BigInteger(source, isUnsigned, isBigEndian: false);
             return true;
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.GetShortestBitLength()" />
-        int System.Numerics.IBinaryInteger<BigInteger>.GetShortestBitLength()
+        int IBinaryInteger<BigInteger>.GetShortestBitLength()
         {
             AssertValid();
             uint[]? bits = _bits;
@@ -3526,11 +3574,11 @@ namespace System.Numerics
 
                 if (value >= 0)
                 {
-                    return (sizeof(int) * 8) - System.Numerics.BitOperations.LeadingZeroCount((uint)(value));
+                    return (sizeof(int) * 8) - BitOperations.LeadingZeroCount((uint)(value));
                 }
                 else
                 {
-                    return (sizeof(int) * 8) + 1 - System.Numerics.BitOperations.LeadingZeroCount((uint)(~value));
+                    return (sizeof(int) * 8) + 1 - BitOperations.LeadingZeroCount((uint)(~value));
                 }
             }
 
@@ -3538,7 +3586,7 @@ namespace System.Numerics
 
             if (_sign >= 0)
             {
-                result += (sizeof(uint) * 8) - System.Numerics.BitOperations.LeadingZeroCount(bits[^1]);
+                result += (sizeof(uint) * 8) - BitOperations.LeadingZeroCount(bits[^1]);
             }
             else
             {
@@ -3557,17 +3605,17 @@ namespace System.Numerics
                     }
                 }
 
-                result += (sizeof(uint) * 8) + 1 - System.Numerics.BitOperations.LeadingZeroCount(~part);
+                result += (sizeof(uint) * 8) + 1 - BitOperations.LeadingZeroCount(~part);
             }
 
             return result;
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.GetByteCount()" />
-        int System.Numerics.IBinaryInteger<BigInteger>.GetByteCount() => GetGenericMathByteCount();
+        int IBinaryInteger<BigInteger>.GetByteCount() => GetGenericMathByteCount();
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.TryWriteBigEndian(Span{byte}, out int)" />
-        bool System.Numerics.IBinaryInteger<BigInteger>.TryWriteBigEndian(Span<byte> destination, out int bytesWritten)
+        bool IBinaryInteger<BigInteger>.TryWriteBigEndian(Span<byte> destination, out int bytesWritten)
         {
             AssertValid();
             uint[]? bits = _bits;
@@ -3669,7 +3717,7 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.TryWriteLittleEndian(Span{byte}, out int)" />
-        bool System.Numerics.IBinaryInteger<BigInteger>.TryWriteLittleEndian(Span<byte> destination, out int bytesWritten)
+        bool IBinaryInteger<BigInteger>.TryWriteLittleEndian(Span<byte> destination, out int bytesWritten)
         {
             AssertValid();
             uint[]? bits = _bits;
@@ -3810,16 +3858,16 @@ namespace System.Numerics
         }
 
         //
-        //  System.Numerics.IBinaryNumber
+        // IBinaryNumber
         //
 
-        /// <inheritdoc cref=" System.Numerics.IBinaryNumber{TSelf}.AllBitsSet" />
-        static BigInteger  System.Numerics.IBinaryNumber<BigInteger>.AllBitsSet => MinusOne;
+        /// <inheritdoc cref="IBinaryNumber{TSelf}.AllBitsSet" />
+        static BigInteger IBinaryNumber<BigInteger>.AllBitsSet => MinusOne;
 
-        /// <inheritdoc cref=" System.Numerics.IBinaryNumber{TSelf}.IsPow2(TSelf)" />
+        /// <inheritdoc cref="IBinaryNumber{TSelf}.IsPow2(TSelf)" />
         public static bool IsPow2(BigInteger value) => value.IsPowerOfTwo;
 
-        /// <inheritdoc cref=" System.Numerics.IBinaryNumber{TSelf}.Log2(TSelf)" />
+        /// <inheritdoc cref="IBinaryNumber{TSelf}.Log2(TSelf)" />
         public static BigInteger Log2(BigInteger value)
         {
             value.AssertValid();
@@ -3838,14 +3886,14 @@ namespace System.Numerics
         }
 
         //
-        //  System.Numerics.IMultiplicativeIdentity
+        // IMultiplicativeIdentity
         //
 
-        /// <inheritdoc cref=" System.Numerics.IMultiplicativeIdentity{TSelf, TResult}.MultiplicativeIdentity" />
-        static BigInteger  System.Numerics.IMultiplicativeIdentity<BigInteger, BigInteger>.MultiplicativeIdentity => One;
+        /// <inheritdoc cref="IMultiplicativeIdentity{TSelf, TResult}.MultiplicativeIdentity" />
+        static BigInteger IMultiplicativeIdentity<BigInteger, BigInteger>.MultiplicativeIdentity => One;
 
         //
-        // System.Numerics.INumber
+        // INumber
         //
 
         /// <inheritdoc cref="INumber{TSelf}.Clamp(TSelf, TSelf, TSelf)" />
@@ -3875,7 +3923,7 @@ namespace System.Numerics
             [DoesNotReturn]
             static void ThrowMinMaxException<T>(T min, T max)
             {
-                throw new ArgumentException("Argument_MinMaxValue, min, max");
+                throw new ArgumentException(SR.Format(SR.Argument_MinMaxValue, min, max));
             }
         }
 
@@ -3903,13 +3951,13 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="INumber{TSelf}.MaxNumber(TSelf, TSelf)" />
-        static BigInteger System.Numerics.INumber<BigInteger>.MaxNumber(BigInteger x, BigInteger y) => Max(x, y);
+        static BigInteger INumber<BigInteger>.MaxNumber(BigInteger x, BigInteger y) => Max(x, y);
 
         /// <inheritdoc cref="INumber{TSelf}.MinNumber(TSelf, TSelf)" />
-        static BigInteger System.Numerics.INumber<BigInteger>.MinNumber(BigInteger x, BigInteger y) => Min(x, y);
+        static BigInteger INumber<BigInteger>.MinNumber(BigInteger x, BigInteger y) => Min(x, y);
 
         /// <inheritdoc cref="INumber{TSelf}.Sign(TSelf)" />
-        static int System.Numerics.INumber<BigInteger>.Sign(BigInteger value)
+        static int INumber<BigInteger>.Sign(BigInteger value)
         {
             value.AssertValid();
 
@@ -3922,16 +3970,16 @@ namespace System.Numerics
         }
 
         //
-        // System.Numerics.INumberBase
+        // INumberBase
         //
 
         /// <inheritdoc cref="INumberBase{TSelf}.Radix" />
-        static int System.Numerics.INumberBase<BigInteger>.Radix => 2;
+        static int INumberBase<BigInteger>.Radix => 2;
 
         /// <inheritdoc cref="INumberBase{TSelf}.CreateChecked{TOther}(TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BigInteger CreateChecked<TOther>(TOther value)
-            where TOther : System.Numerics.INumberBase<TOther>
+            where TOther : INumberBase<TOther>
         {
             BigInteger result;
 
@@ -3950,7 +3998,7 @@ namespace System.Numerics
         /// <inheritdoc cref="INumberBase{TSelf}.CreateSaturating{TOther}(TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BigInteger CreateSaturating<TOther>(TOther value)
-            where TOther : System.Numerics.INumberBase<TOther>
+            where TOther : INumberBase<TOther>
         {
             BigInteger result;
 
@@ -3969,7 +4017,7 @@ namespace System.Numerics
         /// <inheritdoc cref="INumberBase{TSelf}.CreateTruncating{TOther}(TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BigInteger CreateTruncating<TOther>(TOther value)
-            where TOther : System.Numerics.INumberBase<TOther>
+            where TOther : INumberBase<TOther>
         {
             BigInteger result;
 
@@ -3986,10 +4034,10 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsCanonical(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsCanonical(BigInteger value) => true;
+        static bool INumberBase<BigInteger>.IsCanonical(BigInteger value) => true;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsComplexNumber(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsComplexNumber(BigInteger value) => false;
+        static bool INumberBase<BigInteger>.IsComplexNumber(BigInteger value) => false;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsEvenInteger(TSelf)" />
         public static bool IsEvenInteger(BigInteger value)
@@ -4004,19 +4052,19 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsFinite(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsFinite(BigInteger value) => true;
+        static bool INumberBase<BigInteger>.IsFinite(BigInteger value) => true;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsImaginaryNumber(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsImaginaryNumber(BigInteger value) => false;
+        static bool INumberBase<BigInteger>.IsImaginaryNumber(BigInteger value) => false;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsInfinity(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsInfinity(BigInteger value) => false;
+        static bool INumberBase<BigInteger>.IsInfinity(BigInteger value) => false;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsInteger(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsInteger(BigInteger value) => true;
+        static bool INumberBase<BigInteger>.IsInteger(BigInteger value) => true;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsNaN(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsNaN(BigInteger value) => false;
+        static bool INumberBase<BigInteger>.IsNaN(BigInteger value) => false;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsNegative(TSelf)" />
         public static bool IsNegative(BigInteger value)
@@ -4026,10 +4074,10 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsNegativeInfinity(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsNegativeInfinity(BigInteger value) => false;
+        static bool INumberBase<BigInteger>.IsNegativeInfinity(BigInteger value) => false;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsNormal(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsNormal(BigInteger value) => (value != 0);
+        static bool INumberBase<BigInteger>.IsNormal(BigInteger value) => (value != 0);
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsOddInteger(TSelf)" />
         public static bool IsOddInteger(BigInteger value)
@@ -4051,16 +4099,16 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsPositiveInfinity(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsPositiveInfinity(BigInteger value) => false;
+        static bool INumberBase<BigInteger>.IsPositiveInfinity(BigInteger value) => false;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsRealNumber(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsRealNumber(BigInteger value) => true;
+        static bool INumberBase<BigInteger>.IsRealNumber(BigInteger value) => true;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsSubnormal(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsSubnormal(BigInteger value) => false;
+        static bool INumberBase<BigInteger>.IsSubnormal(BigInteger value) => false;
 
         /// <inheritdoc cref="INumberBase{TSelf}.IsZero(TSelf)" />
-        static bool System.Numerics.INumberBase<BigInteger>.IsZero(BigInteger value)
+        static bool INumberBase<BigInteger>.IsZero(BigInteger value)
         {
             value.AssertValid();
             return value._sign == 0;
@@ -4089,7 +4137,7 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="INumberBase{TSelf}.MaxMagnitudeNumber(TSelf, TSelf)" />
-        static BigInteger System.Numerics.INumberBase<BigInteger>.MaxMagnitudeNumber(BigInteger x, BigInteger y) => MaxMagnitude(x, y);
+        static BigInteger INumberBase<BigInteger>.MaxMagnitudeNumber(BigInteger x, BigInteger y) => MaxMagnitude(x, y);
 
         /// <inheritdoc cref="INumberBase{TSelf}.MinMagnitude(TSelf, TSelf)" />
         public static BigInteger MinMagnitude(BigInteger x, BigInteger y)
@@ -4114,15 +4162,15 @@ namespace System.Numerics
         }
 
         /// <inheritdoc cref="INumberBase{TSelf}.MinMagnitudeNumber(TSelf, TSelf)" />
-        static BigInteger System.Numerics.INumberBase<BigInteger>.MinMagnitudeNumber(BigInteger x, BigInteger y) => MinMagnitude(x, y);
+        static BigInteger INumberBase<BigInteger>.MinMagnitudeNumber(BigInteger x, BigInteger y) => MinMagnitude(x, y);
 
         /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromChecked{TOther}(TOther, out TSelf)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool System.Numerics.INumberBase<BigInteger>.TryConvertFromChecked<TOther>(TOther value, out BigInteger result) => TryConvertFromChecked(value, out result);
+        static bool INumberBase<BigInteger>.TryConvertFromChecked<TOther>(TOther value, out BigInteger result) => TryConvertFromChecked(value, out result);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryConvertFromChecked<TOther>(TOther value, out BigInteger result)
-            where TOther : System.Numerics.INumberBase<TOther>
+            where TOther : INumberBase<TOther>
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -4235,11 +4283,11 @@ namespace System.Numerics
 
         /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromSaturating{TOther}(TOther, out TSelf)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool System.Numerics.INumberBase<BigInteger>.TryConvertFromSaturating<TOther>(TOther value, out BigInteger result) => TryConvertFromSaturating(value, out result);
+        static bool INumberBase<BigInteger>.TryConvertFromSaturating<TOther>(TOther value, out BigInteger result) => TryConvertFromSaturating(value, out result);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryConvertFromSaturating<TOther>(TOther value, out BigInteger result)
-            where TOther : System.Numerics.INumberBase<TOther>
+            where TOther : INumberBase<TOther>
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -4352,11 +4400,11 @@ namespace System.Numerics
 
         /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromTruncating{TOther}(TOther, out TSelf)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool System.Numerics.INumberBase<BigInteger>.TryConvertFromTruncating<TOther>(TOther value, out BigInteger result) => TryConvertFromTruncating(value, out result);
+        static bool INumberBase<BigInteger>.TryConvertFromTruncating<TOther>(TOther value, out BigInteger result) => TryConvertFromTruncating(value, out result);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryConvertFromTruncating<TOther>(TOther value, out BigInteger result)
-            where TOther : System.Numerics.INumberBase<TOther>
+            where TOther : INumberBase<TOther>
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -4469,7 +4517,7 @@ namespace System.Numerics
 
         /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToChecked{TOther}(TSelf, out TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool System.Numerics.INumberBase<BigInteger>.TryConvertToChecked<TOther>(BigInteger value, [MaybeNullWhen(false)] out TOther result)
+        static bool INumberBase<BigInteger>.TryConvertToChecked<TOther>(BigInteger value, [MaybeNullWhen(false)] out TOther result)
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -4531,6 +4579,12 @@ namespace System.Numerics
                 result = (TOther)(object)actualResult;
                 return true;
             }
+            else if (typeof(TOther) == typeof(Complex))
+            {
+                Complex actualResult = (Complex)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            }
             else if (typeof(TOther) == typeof(sbyte))
             {
                 sbyte actualResult = checked((sbyte)value);
@@ -4582,7 +4636,7 @@ namespace System.Numerics
 
         /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToSaturating{TOther}(TSelf, out TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool System.Numerics.INumberBase<BigInteger>.TryConvertToSaturating<TOther>(BigInteger value, [MaybeNullWhen(false)] out TOther result)
+        static bool INumberBase<BigInteger>.TryConvertToSaturating<TOther>(BigInteger value, [MaybeNullWhen(false)] out TOther result)
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -4692,6 +4746,12 @@ namespace System.Numerics
                 result = (TOther)(object)actualResult;
                 return true;
             }
+            else if (typeof(TOther) == typeof(Complex))
+            {
+                Complex actualResult = (Complex)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            }
             else if (typeof(TOther) == typeof(sbyte))
             {
                 sbyte actualResult;
@@ -4769,7 +4829,7 @@ namespace System.Numerics
 
         /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToTruncating{TOther}(TSelf, out TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool System.Numerics.INumberBase<BigInteger>.TryConvertToTruncating<TOther>(BigInteger value, [MaybeNullWhen(false)] out TOther result)
+        static bool INumberBase<BigInteger>.TryConvertToTruncating<TOther>(BigInteger value, [MaybeNullWhen(false)] out TOther result)
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -4972,6 +5032,12 @@ namespace System.Numerics
                     actualResult = value._sign;
                 }
 
+                result = (TOther)(object)actualResult;
+                return true;
+            }
+            else if (typeof(TOther) == typeof(Complex))
+            {
+                Complex actualResult = (Complex)value;
                 result = (TOther)(object)actualResult;
                 return true;
             }
@@ -5252,11 +5318,11 @@ namespace System.Numerics
         }
 
         //
-        //  System.Numerics.ISignedNumber
+        // ISignedNumber
         //
 
-        /// <inheritdoc cref=" System.Numerics.ISignedNumber{TSelf}.NegativeOne" />
-        static BigInteger  System.Numerics.ISignedNumber<BigInteger>.NegativeOne => MinusOne;
+        /// <inheritdoc cref="ISignedNumber{TSelf}.NegativeOne" />
+        static BigInteger ISignedNumber<BigInteger>.NegativeOne => MinusOne;
 
         //
         // ISpanParsable

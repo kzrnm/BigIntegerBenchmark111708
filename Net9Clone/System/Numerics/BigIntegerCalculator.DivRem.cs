@@ -127,7 +127,7 @@ namespace System.Numerics
             uint divLo = right.Length > 1 ? right[right.Length - 2] : 0;
 
             // We measure the leading zeros of the divisor
-            int shift = System.Numerics.BitOperations.LeadingZeroCount(divHi);
+            int shift = BitOperations.LeadingZeroCount(divHi);
             int backShift = 32 - shift;
 
             // And, we make sure the most significant bit is set

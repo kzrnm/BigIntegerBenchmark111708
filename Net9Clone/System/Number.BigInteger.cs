@@ -32,8 +32,8 @@ namespace System
         private static Exception GetException(ParsingStatus status)
         {
             return status == ParsingStatus.Failed
-                ? new FormatException("Overflow_ParseBigInteger")
-                : new OverflowException("Overflow_ParseBigInteger");
+                ? new FormatException(SR.Overflow_ParseBigInteger)
+                : new OverflowException(SR.Overflow_ParseBigInteger);
         }
 
         internal static bool TryValidateParseStyleInteger(NumberStyles style, [NotNullWhen(false)] out ArgumentException? e)
@@ -41,14 +41,14 @@ namespace System
             // Check for undefined flags
             if ((style & InvalidNumberStyles) != 0)
             {
-                e = new ArgumentException("Argument_InvalidNumberStyles", nameof(style));
+                e = new ArgumentException(SR.Argument_InvalidNumberStyles, nameof(style));
                 return false;
             }
             if ((style & NumberStyles.AllowHexSpecifier) != 0)
             { // Check for hex number
                 if ((style & ~NumberStyles.HexNumber) != 0)
                 {
-                    e = new ArgumentException("Argument_InvalidHexStyle", nameof(style));
+                    e = new ArgumentException(SR.Argument_InvalidHexStyle, nameof(style));
                     return false;
                 }
             }
@@ -138,7 +138,7 @@ namespace System
 
         internal static ParsingStatus TryParseBigIntegerHexOrBinaryNumberStyle<TParser, TChar>(ReadOnlySpan<TChar> value, NumberStyles style, out BigInteger result)
             where TParser : struct, IBigIntegerHexOrBinaryParser<TParser, TChar>
-            where TChar : unmanaged, System.Numerics.IBinaryInteger<TChar>
+            where TChar : unmanaged, IBinaryInteger<TChar>
         {
             int whiteIndex;
 
@@ -655,7 +655,7 @@ namespace System
                 Debug.Assert(arrayToReturnToPool is not null);
                 ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
 
-                throw new FormatException("Format_TooLarge");
+                throw new FormatException(SR.Format_TooLarge);
             }
 
             int charsForBits = (int)tmpCharCount;
@@ -740,9 +740,6 @@ namespace System
             return spanSuccess;
         }
 
-#if NoOptimization
-        [MethodImpl(MethodImplOptions.NoOptimization)]
-#endif
         private static unsafe string? FormatBigInteger(
             bool targetSpan, BigInteger value,
             string? formatString, ReadOnlySpan<char> formatSpan,
@@ -1083,7 +1080,7 @@ namespace System
             public static int GetBufferSize(int digits, out int maxIndex)
             {
                 uint scale1E9 = (uint)(digits - 1) / MaxPartialDigits;
-                maxIndex = System.Numerics.BitOperations.Log2(scale1E9);
+                maxIndex = BitOperations.Log2(scale1E9);
                 int index = maxIndex + 1;
                 int bufferSize;
                 if ((uint)index < (uint)Indexes.Length)
@@ -1130,7 +1127,7 @@ namespace System
 
                 int trailingPartialCount = Math.DivRem(trailingZeroCount, MaxPartialDigits, out int remainingTrailingZeroCount);
 
-                int fi = System.Numerics.BitOperations.TrailingZeroCount(trailingPartialCount);
+                int fi = BitOperations.TrailingZeroCount(trailingPartialCount);
                 int omittedLength = OmittedLength(fi);
 
                 // Copy first
@@ -1139,7 +1136,7 @@ namespace System
                 trailingPartialCount >>= fi;
                 trailingPartialCount >>= 1;
 
-                if ((System.Numerics.BitOperations.PopCount((uint)trailingPartialCount) & 1) != 0)
+                if ((BitOperations.PopCount((uint)trailingPartialCount) & 1) != 0)
                 {
                     powersOfTen2 = powersOfTen;
                     powersOfTen = bits;
@@ -1209,7 +1206,7 @@ namespace System
 
     internal interface IBigIntegerHexOrBinaryParser<TParser, TChar>
         where TParser : struct, IBigIntegerHexOrBinaryParser<TParser, TChar>
-        where TChar : unmanaged, System.Numerics.IBinaryInteger<TChar>
+        where TChar : unmanaged, IBinaryInteger<TChar>
     {
         static abstract int BitsPerDigit { get; }
 
@@ -1254,7 +1251,7 @@ namespace System
     }
 
     internal readonly struct BigIntegerHexParser<TChar> : IBigIntegerHexOrBinaryParser<BigIntegerHexParser<TChar>, TChar>
-        where TChar : unmanaged, System.Numerics.IBinaryInteger<TChar>
+        where TChar : unmanaged, IBinaryInteger<TChar>
     {
         public static int BitsPerDigit => 4;
 
@@ -1290,7 +1287,7 @@ namespace System
     }
 
     internal readonly struct BigIntegerBinaryParser<TChar> : IBigIntegerHexOrBinaryParser<BigIntegerBinaryParser<TChar>, TChar>
-        where TChar : unmanaged, System.Numerics.IBinaryInteger<TChar>
+        where TChar : unmanaged, IBinaryInteger<TChar>
     {
         public static int BitsPerDigit => 1;
 

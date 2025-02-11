@@ -7,6 +7,8 @@
 		<NoWarn>$(NoWarn);CS0436</NoWarn>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<EnableAOTAnalyzer>true</EnableAOTAnalyzer>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Include="../Common/**/*.cs" LinkBase="Common" />

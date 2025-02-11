@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -291,7 +290,7 @@ namespace System.Globalization
 
             private static bool IsWhite(char ch)
             {
-                return ch == 0x20 || ch >= 0x09 && ch <= 0x0D;
+                return (((ch) == 0x20) || ((ch) >= 0x09 && (ch) <= 0x0D));
             }
 
             private static unsafe char* MatchChars(char* p, char* pEnd, string str)
@@ -333,8 +332,7 @@ namespace System.Globalization
             {
                 string negativeSign = info.NegativeSign;
                 return negativeSign.Length == 1 &&
-                       negativeSign[0] switch
-                       {
+                       negativeSign[0] switch {
                            '\u2012' or         // Figure Dash
                            '\u207B' or         // Superscript Minus
                            '\u208B' or         // Subscript Minus
@@ -349,7 +347,7 @@ namespace System.Globalization
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static unsafe char* MatchNegativeSignChars(char* p, char* pEnd, string negativeSign, bool allowHyphenDuringParsing)
             {
-                char* ret = MatchChars(p, pEnd, negativeSign);
+                char *ret = MatchChars(p, pEnd, negativeSign);
                 if (ret == null && allowHyphenDuringParsing && p < pEnd && *p == '-')
                 {
                     ret = p + 1;
@@ -396,7 +394,7 @@ namespace System.Globalization
                 }
 
                 int state = 0;
-                bool bigNumber = sb != null; // When a StringBuilder is provided then we use it in place of the number.digits char[50]
+                bool bigNumber = (sb != null); // When a StringBuilder is provided then we use it in place of the number.digits char[50]
                 int maxParseDigits = bigNumber ? int.MaxValue : NumberMaxDigits;
 
                 char* p = str;
@@ -409,14 +407,14 @@ namespace System.Globalization
                 {
                     // Eat whitespace unless we've found a sign which isn't followed by a currency symbol.
                     // "-Kr 1231.47" is legal but "- 1231.47" is not.
-                    if (!IsWhite(ch) || (options & NumberStyles.AllowLeadingWhite) == 0 || (state & StateSign) != 0 && (state & StateCurrency) == 0 && numfmt.NumberNegativePattern != 2)
+                    if (!IsWhite(ch) || (options & NumberStyles.AllowLeadingWhite) == 0 || ((state & StateSign) != 0 && ((state & StateCurrency) == 0 && numfmt.NumberNegativePattern != 2)))
                     {
-                        if ((options & NumberStyles.AllowLeadingSign) != 0 && (state & StateSign) == 0 && ((next = MatchChars(p, strEnd, numfmt.PositiveSign)) != null || (next = MatchNegativeSignChars(p, strEnd, numfmt.NegativeSign, allowHyphenDuringParsing)) != null && (number.sign = true)))
+                        if ((((options & NumberStyles.AllowLeadingSign) != 0) && (state & StateSign) == 0) && ((next = MatchChars(p, strEnd, numfmt.PositiveSign)) != null || ((next = MatchNegativeSignChars(p, strEnd, numfmt.NegativeSign, allowHyphenDuringParsing)) != null && (number.sign = true))))
                         {
                             state |= StateSign;
                             p = next - 1;
                         }
-                        else if (ch == '(' && (options & NumberStyles.AllowParentheses) != 0 && (state & StateSign) == 0)
+                        else if (ch == '(' && ((options & NumberStyles.AllowParentheses) != 0) && ((state & StateSign) == 0))
                         {
                             state |= StateSign | StateParens;
                             number.sign = true;
@@ -442,11 +440,11 @@ namespace System.Globalization
                 int digEnd = 0;
                 while (true)
                 {
-                    if (char.IsAsciiDigit(ch) || (options & NumberStyles.AllowHexSpecifier) != 0 && char.IsBetween((char)(ch | 0x20), 'a', 'f'))
+                    if (char.IsAsciiDigit(ch) || (((options & NumberStyles.AllowHexSpecifier) != 0) && char.IsBetween((char)(ch | 0x20), 'a', 'f')))
                     {
                         state |= StateDigits;
 
-                        if (ch != '0' || (state & StateNonZero) != 0 || bigNumber && (options & NumberStyles.AllowHexSpecifier) != 0)
+                        if (ch != '0' || (state & StateNonZero) != 0 || (bigNumber && ((options & NumberStyles.AllowHexSpecifier) != 0)))
                         {
                             if (digCount < maxParseDigits)
                             {
@@ -475,12 +473,12 @@ namespace System.Globalization
                             number.scale--;
                         }
                     }
-                    else if ((options & NumberStyles.AllowDecimalPoint) != 0 && (state & StateDecimal) == 0 && ((next = MatchChars(p, strEnd, decSep)) != null || parsingCurrency && (state & StateCurrency) == 0 && (next = MatchChars(p, strEnd, numfmt.NumberDecimalSeparator)) != null))
+                    else if (((options & NumberStyles.AllowDecimalPoint) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, strEnd, decSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, strEnd, numfmt.NumberDecimalSeparator)) != null))
                     {
                         state |= StateDecimal;
                         p = next - 1;
                     }
-                    else if ((options & NumberStyles.AllowThousands) != 0 && (state & StateDigits) != 0 && (state & StateDecimal) == 0 && ((next = MatchChars(p, strEnd, groupSep)) != null || parsingCurrency && (state & StateCurrency) == 0 && (next = MatchChars(p, strEnd, numfmt.NumberGroupSeparator)) != null))
+                    else if (((options & NumberStyles.AllowThousands) != 0) && ((state & StateDigits) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, strEnd, groupSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, strEnd, numfmt.NumberGroupSeparator)) != null))
                     {
                         p = next - 1;
                     }
@@ -499,7 +497,7 @@ namespace System.Globalization
                     dig[digEnd] = '\0';
                 if ((state & StateDigits) != 0)
                 {
-                    if ((ch == 'E' || ch == 'e') && (options & NumberStyles.AllowExponent) != 0)
+                    if ((ch == 'E' || ch == 'e') && ((options & NumberStyles.AllowExponent) != 0))
                     {
                         char* temp = p;
                         ch = ++p < strEnd ? *p : '\0';
@@ -553,12 +551,12 @@ namespace System.Globalization
                     {
                         if (!IsWhite(ch) || (options & NumberStyles.AllowTrailingWhite) == 0)
                         {
-                            if ((options & NumberStyles.AllowTrailingSign) != 0 && (state & StateSign) == 0 && ((next = MatchChars(p, strEnd, numfmt.PositiveSign)) != null || (next = MatchNegativeSignChars(p, strEnd, numfmt.NegativeSign, allowHyphenDuringParsing)) != null && (number.sign = true)))
+                            if (((options & NumberStyles.AllowTrailingSign) != 0 && ((state & StateSign) == 0)) && ((next = MatchChars(p, strEnd, numfmt.PositiveSign)) != null || (((next = MatchNegativeSignChars(p, strEnd, numfmt.NegativeSign, allowHyphenDuringParsing)) != null) && (number.sign = true))))
                             {
                                 state |= StateSign;
                                 p = next - 1;
                             }
-                            else if (ch == ')' && (state & StateParens) != 0)
+                            else if (ch == ')' && ((state & StateParens) != 0))
                             {
                                 state &= ~StateParens;
                             }
@@ -608,7 +606,7 @@ namespace System.Globalization
                 {
                     char* p = stringPointer;
                     if (!ParseNumber(ref p, p + str.Length, options, ref number, sb, numfmt, parseDecimal)
-                        || p - stringPointer < str.Length && !TrailingZeros(str, (int)(p - stringPointer)))
+                        || (p - stringPointer < str.Length && !TrailingZeros(str, (int)(p - stringPointer))))
                     {
                         return false;
                     }
@@ -721,9 +719,9 @@ namespace System.Globalization
                             // Check if we are about to overflow past our limit of 9 digits
                             if (n >= 100_000_000)
                             {
-                                throw new FormatException("Argument_BadFormatSpecifier");
+                                throw new FormatException(SR.Argument_BadFormatSpecifier);
                             }
-                            n = n * 10 + format[i++] - '0';
+                            n = ((n * 10) + format[i++] - '0');
                         }
 
                         // If we're at the end of the digits rather than having stopped because we hit something
@@ -839,7 +837,7 @@ namespace System.Globalization
                             bool enableRounding = true;
                             if (nMaxDigits < 1)
                             {
-                                if (isDecimal && nMaxDigits == -1)
+                                if (isDecimal && (nMaxDigits == -1))
                                 {
                                     // Default to 29 digits precision only for G formatting without a precision specifier
                                     // This ensures that the PAL code pads out to the correct place even when we use the default precision
@@ -861,7 +859,7 @@ namespace System.Globalization
                             }
                             else
                             {
-                                if (isDecimal && number.digits[0] == 0)
+                                if (isDecimal && (number.digits[0] == 0))
                                 {
                                     // Minus zero should be formatted as 0
                                     number.sign = false;
@@ -899,7 +897,7 @@ namespace System.Globalization
                         }
 
                     default:
-                        throw new FormatException("Argument_BadFormatSpecifier");
+                        throw new FormatException(SR.Argument_BadFormatSpecifier);
                 }
             }
 
@@ -984,20 +982,20 @@ namespace System.Globalization
                         groupSizeIndex = 0;
                         int digitCount = 0;
                         int digStart;
-                        digStart = digPos < digLength ? digPos : digLength;
+                        digStart = (digPos < digLength) ? digPos : digLength;
                         char* p = tmpBuffer + bufferSize - 1;
                         for (int i = digPos - 1; i >= 0; i--)
                         {
-                            *p-- = i < digStart ? dig[i] : '0';
+                            *(p--) = (i < digStart) ? dig[i] : '0';
 
                             if (groupSize > 0)
                             {
                                 digitCount++;
-                                if (digitCount == groupSize && i != 0)
+                                if ((digitCount == groupSize) && (i != 0))
                                 {
                                     for (int j = groupSeparatorLen - 1; j >= 0; j--)
                                     {
-                                        *p-- = sGroup[j];
+                                        *(p--) = sGroup[j];
                                     }
 
                                     if (groupSizeIndex < groupSizeLen - 1)
@@ -1032,7 +1030,7 @@ namespace System.Globalization
                 if (nMaxDigits > 0)
                 {
                     sb.Append(sDecimal);
-                    if (digPos < 0 && nMaxDigits > 0)
+                    if ((digPos < 0) && (nMaxDigits > 0))
                     {
                         int zeroes = Math.Min(-digPos, nMaxDigits);
                         sb.Append('0', zeroes);
@@ -1042,7 +1040,7 @@ namespace System.Globalization
 
                     while (nMaxDigits > 0)
                     {
-                        sb.Append(*dig != 0 ? *dig++ : '0');
+                        sb.Append((*dig != 0) ? *dig++ : '0');
                         nMaxDigits--;
                     }
                 }
@@ -1075,7 +1073,7 @@ namespace System.Globalization
             {
                 char* dig = number.digits;
 
-                sb.Append(*dig != 0 ? *dig++ : '0');
+                sb.Append((*dig != 0) ? *dig++ : '0');
 
                 if (nMaxDigits != 1) // For E0 we would like to suppress the decimal point
                 {
@@ -1084,7 +1082,7 @@ namespace System.Globalization
 
                 while (--nMaxDigits > 0)
                 {
-                    sb.Append(*dig != 0 ? *dig++ : '0');
+                    sb.Append((*dig != 0) ? *dig++ : '0');
                 }
 
                 int e = number.digits[0] == 0 ? 0 : number.scale - 1;
@@ -1139,7 +1137,7 @@ namespace System.Globalization
                 {
                     do
                     {
-                        sb.Append(*dig != 0 ? *dig++ : '0');
+                        sb.Append((*dig != 0) ? *dig++ : '0');
                     } while (--digPos > 0);
                 }
                 else
@@ -1380,10 +1378,10 @@ namespace System.Globalization
                                     break;
                                 case 'E':
                                 case 'e':
-                                    if (src < format.Length && pFormat[src] == '0' ||
-                                        src + 1 < format.Length && (pFormat[src] == '+' || pFormat[src] == '-') && pFormat[src + 1] == '0')
+                                    if ((src < format.Length && pFormat[src] == '0') ||
+                                        (src + 1 < format.Length && (pFormat[src] == '+' || pFormat[src] == '-') && pFormat[src + 1] == '0'))
                                     {
-                                        while (++src < format.Length && pFormat[src] == '0') ;
+                                        while (++src < format.Length && pFormat[src] == '0');
                                         scientific = true;
                                     }
                                     break;
@@ -1476,8 +1474,8 @@ namespace System.Globalization
 
                         int groupSize = groupTotalSizeCount;
 
-                        int totalDigits = digPos + (adjust < 0 ? adjust : 0); // Actual number of digits in o/p
-                        int numDigits = firstDigit > totalDigits ? firstDigit : totalDigits;
+                        int totalDigits = digPos + ((adjust < 0) ? adjust : 0); // Actual number of digits in o/p
+                        int numDigits = (firstDigit > totalDigits) ? firstDigit : totalDigits;
                         while (numDigits > groupTotalSizeCount)
                         {
                             if (groupSize == 0)
@@ -1582,7 +1580,7 @@ namespace System.Globalization
                                         break;
                                     }
                                     // If the format has trailing zeros or the format has a decimal and digits remain
-                                    if (lastDigit < 0 || decimalPos < digitCount && *cur != 0)
+                                    if (lastDigit < 0 || (decimalPos < digitCount && *cur != 0))
                                     {
                                         sb.Append(info.NumberDecimalSeparator);
                                         decimalWritten = true;
