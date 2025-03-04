@@ -5,6 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);CS0436</NoWarn>
+		<PublishReadyToRun>true</PublishReadyToRun>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<EnableAOTAnalyzer>true</EnableAOTAnalyzer>
 	</PropertyGroup>

@@ -25,7 +25,7 @@ public class BenchmarkConfig : ManualConfig
     }
     public BenchmarkConfig()
     {
-        AddDiagnoser(new DisassemblyDiagnoser(new DisassemblyDiagnoserConfig(maxDepth: 100, exportHtml: true, exportDiff: true)));
+        //AddDiagnoser(new DisassemblyDiagnoser(new DisassemblyDiagnoserConfig(maxDepth: 100, exportHtml: true, exportDiff: true)));
         AddExporter(BenchmarkDotNet.Exporters.MarkdownExporter.GitHub);
         AddExporter(BenchmarkDotNet.Exporters.MarkdownExporter.GitHub);
         AddJob(Job.ShortRun.WithToolchain(CsProjCoreToolchain.NetCoreApp80));

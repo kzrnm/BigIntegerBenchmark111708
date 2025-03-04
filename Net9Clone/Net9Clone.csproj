@@ -8,6 +8,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<EnableAOTAnalyzer>true</EnableAOTAnalyzer>
 		<SignAssembly>True</SignAssembly>
+		<PublishReadyToRun>true</PublishReadyToRun>
 		<AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 	<ItemGroup>
