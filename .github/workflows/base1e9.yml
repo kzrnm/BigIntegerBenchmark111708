@@ -1,0 +1,45 @@
+name: Base1e9
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+        - macos-latest
+        - windows-latest
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      - name: publish
+        run: |
+          dotnet build BitsToBase1e9/BitsToBase1e9.csproj -c Release
+          dotnet publish BitsToBase1e9/BitsToBase1e9.csproj -c Release -f net9.0 /p:PublishAot=true
+          dotnet publish BitsToBase1e9/BitsToBase1e9.csproj -c Release -f net8.0 /p:PublishAot=true
+          dotnet publish BitsToBase1e9/BitsToBase1e9.csproj -c Release -f net9.0 /p:PublishReadyToRun=true
+          dotnet publish BitsToBase1e9/BitsToBase1e9.csproj -c Release -f net8.0 /p:PublishReadyToRun=true
+      - name: Run
+        shell: bash
+        run: |
+          EXTENSION="${{ matrix.os=='windows-latest' && '.exe' || '' }}"
+          echo '# ${{matrix.os}}' >> $GITHUB_STEP_SUMMARY
+          echo '## Default(.NET8) on ${{matrix.os}}' >> $GITHUB_STEP_SUMMARY
+          BitsToBase1e9/bin/Release/net8.0/BitsToBase1e9${EXTENSION} >> $GITHUB_STEP_SUMMARY
+          echo '## Default(.NET9) on ${{matrix.os}}' >> $GITHUB_STEP_SUMMARY
+          BitsToBase1e9/bin/Release/net9.0/BitsToBase1e9${EXTENSION} >> $GITHUB_STEP_SUMMARY
+
+          echo '## ReadyToRun(.NET8) on ${{matrix.os}}' >> $GITHUB_STEP_SUMMARY
+          BitsToBase1e9/bin/Release/net8.0/*/publish/BitsToBase1e9${EXTENSION} >> $GITHUB_STEP_SUMMARY
+          echo '## ReadyToRun(.NET9) on ${{matrix.os}}' >> $GITHUB_STEP_SUMMARY
+          BitsToBase1e9/bin/Release/net9.0/*/publish/BitsToBase1e9${EXTENSION} >> $GITHUB_STEP_SUMMARY
+
+          echo '## Native(.NET8) on ${{matrix.os}}' >> $GITHUB_STEP_SUMMARY
+          BitsToBase1e9/bin/Release/net8.0/*/native/BitsToBase1e9${EXTENSION} >> $GITHUB_STEP_SUMMARY
+          echo '## Native(.NET9) on ${{matrix.os}}' >> $GITHUB_STEP_SUMMARY
+          BitsToBase1e9/bin/Release/net9.0/*/native/BitsToBase1e9${EXTENSION} >> $GITHUB_STEP_SUMMARY
